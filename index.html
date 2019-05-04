@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SB Admin 2 - Tables</title>
+  <title>Application Slayer - Database</title>
 
   <!-- Custom fonts for this template -->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -24,34 +24,79 @@
   <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 
     <script>
-      function init() {
-        $.ajax({url: "https://unity3d-46471.firebaseio.com/aaaclarkproj.json", success: function(result){            
-            $.each(result, function(key, value) {
-              console.log(key + ": " + value);
-              console.log(value.Name);
-              console.log(value.RemTime);
-              console.log(value.Score1);
-              console.log(value.Score2);
-              console.log(value.Score3);
-              console.log(value.Score4);
-              console.log(value.Score5);
-              $('#result_table tr:last').after(
-                '<tr>' +
-                '<td>' + value.Name + '</td>' + 
-                '<td>' + '<input id="score1" type="text"></input>' + '</td>' + 
-                '<td>' + '<input id="score2" type="text"></input>' + '</td>' + 
-                '<td>' + '<input id="score3" type="text"></input>' + '</td>' + 
-                '<td>' + '<input id="score4" type="text"></input>' + '</td>' + 
-                '<td>' + '<input id="score5" type="text"></input>' + '</td>' + 
-				
-                '<td>' + value.RemTime + '</td>' + 
-				'<td>' + '<button type="button">Update</button>' + '</td>' + 
-                '</tr>'
-              );
+      function zeroPad(num, numZeros) {
+    let n = Math.abs(num);
+    let zeros = Math.max(0, numZeros - Math.floor(n).toString().length );
+    let zeroString = Math.pow(10,zeros).toString().substr(1);
+    if( num < 0 ) {
+        zeroString = '-' + zeroString;
+    }
+
+    return zeroString+n;
+}
+
+function updateScore(machine, id) {
+    machine = zeroPad(machine, 7);
+    $.ajax({
+        url: "https://unity3d-46471.firebaseio.com/aaaclarkproj/" + machine + "/" + id + ".json", // Use id to construct url
+        data: $('#' + machine + '-' + id).val(), // Button passes id, use jQuery to get value from input with that id
+        type: 'PUT',
+        success: function () {
+            console.log("success")
+			
+			$.ajax({
+				url: "https://unity3d-46471.firebaseio.com/aaaclarkproj/" + machine + ".json", success: function (result) {
+					console.log(result);
+					
+					remtime = result.score1 + result.score2 + result.score3 + result.score4 + result.score5;
+					remtime = remtime * 36
+					
+					$.ajax({
+						url: "https://unity3d-46471.firebaseio.com/aaaclarkproj/" + machine + "/RemTime.json", 
+						data: remtime + '', 
+						type: 'PUT',
+						success: function () {
+							console.log("success")
+						}
+					});
+				}
+			});
+        }
+    });
+}
+
+function init() {
+    $.ajax({
+        url: "https://unity3d-46471.firebaseio.com/aaaclarkproj.json", success: function (result) {
+            $.each(result, function (machine, value) {
+                console.log(machine + " < MACHINE");
+                console.log(machine + ": " + value);
+                console.log(value.Name);
+                console.log(value.RemTime);
+                console.log(value.Score1);
+                console.log(value.Score2);
+                console.log(value.Score3);
+                console.log(value.Score4);
+                console.log(value.Score5);
+
+
+                $('#result_table tr:last').after(
+                    '<tr>' +
+                    '<td>' + value.Name + '</td>' +
+                    '<td>' + '<input id="' + machine + '-score1" type="text" value="' + value.score1 + '"> <button onclick="updateScore(' + machine + ', \'score1\')">Update</button>' + '</td>' +
+                    '<td>' + '<input id="' + machine + '-score2" type="text" value="' + value.score2 + '"> <button onclick="updateScore(' + machine + ', \'score2\')">Update</button>' + '</td>' +
+                    '<td>' + '<input id="' + machine + '-score3" type="text" value="' + value.score3 + '"> <button onclick="updateScore(' + machine + ', \'score3\')">Update</button>' + '</td>' +
+                    '<td>' + '<input id="' + machine + '-score4" type="text" value="' + value.score4 + '"> <button onclick="updateScore(' + machine + ', \'score4\')">Update</button>' + '</td>' +
+                    '<td>' + '<input id="' + machine + '-score5" type="text" value="' + value.score5 + '"> <button onclick="updateScore(' + machine + ', \'score5\')">Update</button>' + '</td>' +
+                    '<td>' + value.RemTime + '</td>' +
+                    '</tr>'
+                );
             });
-        }});        
-      }
-      init();
+        }
+    });
+}
+
+init();
     </script>    
 
 </head>
@@ -69,99 +114,34 @@
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-laugh-wink"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+        <div class="sidebar-brand-text mx-3">APPLICATION SLAYER</div>
       </a>
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
 
-      <!-- Nav Item - Dashboard -->
-      <li class="nav-item">
-        <a class="nav-link" href="index.html">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span></a>
-      </li>
+      
+
+      
+
+      
+
+      
 
       <!-- Divider -->
       <hr class="sidebar-divider">
 
-      <!-- Heading -->
-      <div class="sidebar-heading">
-        Interface
-      </div>
+      
 
-      <!-- Nav Item - Pages Collapse Menu -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-          <i class="fas fa-fw fa-cog"></i>
-          <span>Components</span>
-        </a>
-        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Custom Components:</h6>
-            <a class="collapse-item" href="buttons.html">Buttons</a>
-            <a class="collapse-item" href="cards.html">Cards</a>
-          </div>
-        </div>
-      </li>
+      
 
-      <!-- Nav Item - Utilities Collapse Menu -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
-          <i class="fas fa-fw fa-wrench"></i>
-          <span>Utilities</span>
-        </a>
-        <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Custom Utilities:</h6>
-            <a class="collapse-item" href="utilities-color.html">Colors</a>
-            <a class="collapse-item" href="utilities-border.html">Borders</a>
-            <a class="collapse-item" href="utilities-animation.html">Animations</a>
-            <a class="collapse-item" href="utilities-other.html">Other</a>
-          </div>
-        </div>
-      </li>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider">
-
-      <!-- Heading -->
-      <div class="sidebar-heading">
-        Addons
-      </div>
-
-      <!-- Nav Item - Pages Collapse Menu -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-          <i class="fas fa-fw fa-folder"></i>
-          <span>Pages</span>
-        </a>
-        <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Login Screens:</h6>
-            <a class="collapse-item" href="login.html">Login</a>
-            <a class="collapse-item" href="register.html">Register</a>
-            <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-            <div class="collapse-divider"></div>
-            <h6 class="collapse-header">Other Pages:</h6>
-            <a class="collapse-item" href="404.html">404 Page</a>
-            <a class="collapse-item" href="blank.html">Blank Page</a>
-          </div>
-        </div>
-      </li>
-
-      <!-- Nav Item - Charts -->
-      <li class="nav-item">
-        <a class="nav-link" href="charts.html">
-          <i class="fas fa-fw fa-chart-area"></i>
-          <span>Charts</span></a>
-      </li>
+      
 
       <!-- Nav Item - Tables -->
       <li class="nav-item active">
-        <a class="nav-link" href="tables.html">
+        <a class="nav-link" href="index.html">
           <i class="fas fa-fw fa-table"></i>
-          <span>Tables</span></a>
+          <span>Teacher Portal</span></a>
       </li>
 
       <!-- Divider -->
@@ -225,14 +205,14 @@
             </li>
 
             <!-- Nav Item - Alerts -->
-            <li class="nav-item dropdown no-arrow mx-1">
+            <!--<li class="nav-item dropdown no-arrow mx-1">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-bell fa-fw"></i>
+                <i class="fas fa-bell fa-fw"></i>-->
                 <!-- Counter - Alerts -->
-                <span class="badge badge-danger badge-counter">3+</span>
+                <!--<span class="badge badge-danger badge-counter">3+</span>
               </a>
               <!-- Dropdown - Alerts -->
-              <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+              <!--<div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
                 <h6 class="dropdown-header">
                   Alerts Center
                 </h6>
@@ -243,11 +223,11 @@
                     </div>
                   </div>
                   <div>
-                    <div class="small text-gray-500">December 12, 2019</div>
-                    <span class="font-weight-bold">A new monthly report is ready to download!</span>
+                    <div class="small text-gray-500">April 20, 2019</div>
+                    <span class="font-weight-bold">A bruh moment has been detected!</span>
                   </div>
                 </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
+                <!--<a class="dropdown-item d-flex align-items-center" href="#">
                   <div class="mr-3">
                     <div class="icon-circle bg-success">
                       <i class="fas fa-donate text-white"></i>
@@ -271,31 +251,31 @@
                 </a>
                 <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
               </div>
-            </li>
+            </li>-->
 
             <!-- Nav Item - Messages -->
-            <li class="nav-item dropdown no-arrow mx-1">
+            <!--<li class="nav-item dropdown no-arrow mx-1">
               <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-envelope fa-fw"></i>
                 <!-- Counter - Messages -->
-                <span class="badge badge-danger badge-counter">7</span>
+                <!--<span class="badge badge-danger badge-counter">7</span>
               </a>
               <!-- Dropdown - Messages -->
-              <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+              <!--<div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
                 <h6 class="dropdown-header">
                   Message Center
                 </h6>
                 <a class="dropdown-item d-flex align-items-center" href="#">
                   <div class="dropdown-list-image mr-3">
-                    <img class="rounded-circle" src="https://source.unsplash.com/fn_BT9fwg_E/60x60" alt="">
+                    <img class="rounded-circle" src="https://styles.redditmedia.com/t5_ns0iz/styles/profileIcon_ujl6sr9yeui11.jpg?width=256&height=256&crop=256:256,smart&s=f2570e1608eaa3faf3ac5d6583dd24a54926a1be" alt="">
                     <div class="status-indicator bg-success"></div>
                   </div>
                   <div class="font-weight-bold">
-                    <div class="text-truncate">Hi there! I am wondering if you can help me with a problem I've been having.</div>
-                    <div class="small text-gray-500">Emily Fowler · 58m</div>
+                    <div class="text-truncate">REEEEEEEEEEEEEE! WHERES MY TEEEEEENNNNDIIIEEEESSSSSSSSSSSSSSSSSSSS!!!</div>
+                    <div class="small text-gray-500">Bob · 69m</div>
                   </div>
                 </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
+                <!--<a class="dropdown-item d-flex align-items-center" href="#">
                   <div class="dropdown-list-image mr-3">
                     <img class="rounded-circle" src="https://source.unsplash.com/AU4VPcFN4LE/60x60" alt="">
                     <div class="status-indicator"></div>
@@ -334,8 +314,8 @@
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Valerie Luna</span>
-                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Dio Brando</span>
+                <img class="img-profile rounded-circle" src="http://pm1.narvii.com/6627/df3e547e03e92eab400c1b421e6485ac8fde7e3b_00.jpg">
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
@@ -368,13 +348,13 @@
         <div class="container-fluid">
 
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Tables</h1>
-          <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below. For more information about DataTables, please visit the <a target="_blank" href="https://datatables.net">official DataTables documentation</a>.</p>
+          <h1 class="h3 mb-2 text-gray-800">Grades and Time</h1>
+          <p class="mb-4">List of Students, Scores, and Time</a>.</p>
 
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-              <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+              <h6 class="m-0 font-weight-bold text-primary">Scores and Time</h6>
             </div>
             <div class="card-body">
               <div class="table-responsive">
@@ -390,7 +370,6 @@
 						  <th>Score4</th> 
 						  <th>Score5</th> 
 						  <th>Time Remaining</th>
-						  <th>Update</th>
 						</tr>
 						<!--<tr>
 						  <td>Clark</td>
@@ -893,7 +872,7 @@
       <footer class="sticky-footer bg-white">
         <div class="container my-auto">
           <div class="copyright text-center my-auto">
-            <span>Copyright &copy; Your Website 2019</span>
+            <span>Copyright &copy; Application Slayer 2019</span>
           </div>
         </div>
       </footer>
