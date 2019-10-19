@@ -49,7 +49,7 @@ function updateScore(machine, id) {
 					console.log(result);
 					
 					remtime = result.score1 + result.score2 + result.score3 + result.score4 + result.score5;
-					remtime = remtime * 36
+					remtime = remtime * 18
 					
 					$.ajax({
 						url: "https://unity3d-46471.firebaseio.com/aaaclarkproj/" + machine + "/RemTime.json", 
